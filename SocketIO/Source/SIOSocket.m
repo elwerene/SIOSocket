@@ -143,7 +143,18 @@
 
     for (id argument = event; argument != nil; argument = va_arg(args, id))
     {
-        [arguments addObject: [NSString stringWithFormat: @"'%@'", argument]];
+        if ([argument isKindOfClass:[NSDictionary class]]) {
+            NSError *error = nil;
+            NSData *json = [NSJSONSerialization dataWithJSONObject:argument options:0 error:&error];
+            if(error) {
+                [arguments addObject: [NSString stringWithFormat: @"'%@'", argument]];
+            } else {
+                NSString* jsonString = [[NSString alloc] initWithData:json encoding:NSUTF8StringEncoding];
+                [arguments addObject:jsonString];
+            }
+        } else {
+            [arguments addObject: [NSString stringWithFormat: @"'%@'", argument]];
+        }
     }
 
     va_end(args);
